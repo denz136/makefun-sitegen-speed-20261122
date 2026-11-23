@@ -95,14 +95,15 @@ export function lex(src) {
       i++;
       continue;
     }
-    if (QUOTE.test(line)) {
+    if (line.charCodeAt(0) === 62 && QUOTE.test(line)) {
       const body = [];
       while (i < lines.length && QUOTE.test(lines[i])) body.push(lines[i++].replace(/^> ?/, ''));
       tokens.push({ type: 'blockquote', lines: body.map(trimLine).filter((l) => l !== '') });
       continue;
     }
-    const bullet = BULLET.exec(line);
-    const ordered = bullet === null ? ORDERED.exec(line) : null;
+    const c0 = line.charCodeAt(0);
+    const bullet = (c0 === 45 || c0 === 42) ? BULLET.exec(line) : null;
+    const ordered = bullet === null && c0 >= 48 && c0 <= 57 ? ORDERED.exec(line) : null;
     if (bullet !== null || ordered !== null) {
       const isOrdered = ordered !== null;
       const marker = isOrdered ? ORDERED : BULLET;
